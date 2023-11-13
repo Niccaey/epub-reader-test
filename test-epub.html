@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.1.5/jszip.min.js"></script>
+  <script src="https://github.com/futurepress/epub.js/releases/download/v0.3.88/epub.min.js"></script>
+</head>
+<body>
+
+<input type="file" accept="application/epub+zip" id="bookChooser">
+
+<div id="area"></div>
+
+
+<script>
+  //var book = ePub("https://www.gutenberg.org/ebooks/72112.epub.noimages");
+  //var book = ePub("https://s3.amazonaws.com/epubjs/books/moby-dick/OPS/package.opf");
+  //var rendition = book.renderTo("area", {width: 600, height: 400});
+  //var displayed = rendition.display();
+
+  book = null;
+  //document.getElementById("bookChooser").addEventListener("change", calledIfChanged)
+  document.getElementById("bookChooser").addEventListener("change", function (e) {
+      console.log("ich bin hier!");
+      console.log(e);
+      var firstFile = e.target.files[0];
+      if (window.FileReader) {
+          var reader = new FileReader();
+          reader.onload = function (e) {
+              console.log(e.target.result);
+              book = ePub({bookPath: e.target.result});
+
+              var rendition = book.renderTo("area", {width: 600, height: 400});
+              book.ready.then(function(){
+                  console.log("ready!")
+              });
+              rendition.display();
+          }.bind(this);
+
+          console.log("reader.readAsArrayBuffer");
+          reader.readAsArrayBuffer(firstFile);
+      }
+  });
+
+  function calledIfChanged(parameter) {
+      console.log("ich bin hier!");
+      console.log(parameter);
+  }
+</script>
+</body>
+</html>
