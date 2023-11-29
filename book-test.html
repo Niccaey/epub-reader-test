@@ -5,13 +5,24 @@
 <head>
     <title>Achtsam morden</title>
     <link href="../Styles/idGeneratedStyles.css" rel="stylesheet" type="text/css"/>
+    <style>
+        .hidden {
+            display: none;
+        }
+    </style>
     <script>
         document.addEventListener('keydown', function(event) {
             // Überprüfen, ob die gedrückte Taste die Taste "p" ist
             if (event.key === 'p') {
-                // Den Inhalt des ersten <p>-Elements anzeigen
-                var paragraphContent = document.querySelector('p._0e_GS_Senkung').textContent;
-                alert(paragraphContent);
+                // Alle <p>-Elemente ausblenden
+                var allParagraphs = document.querySelectorAll('p._0a_GS');
+                allParagraphs.forEach(function(paragraph) {
+                    paragraph.classList.add('hidden');
+                });
+
+                // Das gewünschte <p>-Element anzeigen
+                var selectedParagraph = document.querySelector('p._0e_GS_Senkung');
+                selectedParagraph.classList.remove('hidden');
             }
         });
     </script>
