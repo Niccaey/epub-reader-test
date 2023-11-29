@@ -11,19 +11,24 @@
         }
     </style>
     <script>
-        document.addEventListener('keydown', function(event) {
-            // Überprüfen, ob die gedrückte Taste die Taste "p" ist
-            if (event.key === 'p') {
-                // Alle <p>-Elemente ausblenden
-                var allParagraphs = document.querySelectorAll('p._0a_GS');
-                allParagraphs.forEach(function(paragraph) {
-                    paragraph.classList.add('hidden');
-                });
+        document.addEventListener('DOMContentLoaded', function() {
+            var currentIndex = 0;
 
-                // Das gewünschte <p>-Element anzeigen
-                var selectedParagraph = document.querySelector('p._0e_GS_Senkung');
-                selectedParagraph.classList.remove('hidden');
-            }
+            document.addEventListener('keydown', function(event) {
+                // Überprüfen, ob die gedrückte Taste die Taste "p" ist
+                if (event.key === 'p') {
+                    // Alle <p>-Elemente ausblenden
+                    var allParagraphs = document.querySelectorAll('p._0a_GS');
+                    allParagraphs.forEach(function(paragraph, index) {
+                        paragraph.classList.add('hidden');
+                    });
+
+                    // Das nächste <p>-Element anzeigen
+                    currentIndex = (currentIndex + 1) % allParagraphs.length;
+                    var selectedParagraph = allParagraphs[currentIndex];
+                    selectedParagraph.classList.remove('hidden');
+                }
+            });
         });
     </script>
 </head>
