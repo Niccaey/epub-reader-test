@@ -11,16 +11,16 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.1.5/jszip.min.js"></script>
     <script src="https://github.com/futurepress/epub.js/releases/download/v0.3.88/epub.min.js"></script>
 
-    <!--<link re<l="stylesheet" type="text/css" href="epub-example-stylesheet.css">-->
-
-    </head>
-    <body>
+</head>
+<body>
     <div id="title"><input type="file" id="input"></div>
+    <select id="toc"></select>
     <div id="viewer" class="spreads"></div>
     <a id="prev" href="#prev" class="arrow">‹</a>
     <a id="next" href="#next" class="arrow">›</a>
     <a id="g" href="#g" class="arrow">b</a>
     <a id="k" href="#k" class="arrow">s</a>
+    <a id="paragraph" href="#paragraph" class="arrow">paragraph</a>
 
     <script>
         let book = ePub();
@@ -49,11 +49,36 @@
             book.open(bookData, "binary");
 
             rendition = book.renderTo("viewer", {
-                width: "100%",
-                height: 600
+                flow: "scrolled-doc"
             });
 
-            rendition.display();
+            rendition.display(20);
+
+            book.loaded.navigation.then(function(toc) {
+                let select = document.getElementById("toc"),
+                    docfrag = document.createDocumentFragment();
+
+                toc.forEach(function (chapter) {
+                    let option = document.createElement("option");
+                    option.textContent = chapter.label;
+                    option.ref = chapter.href;
+
+                    docfrag.appendChild(option);
+                });
+
+                select.appendChild(docfrag);
+
+                select.onchange = function () {
+                    let index = select.selectedIndex,
+                        url = select.options[index].ref;
+                    display(url);
+                    return false;
+                };
+
+                book.opened.then(function () {
+                    display(currentSectionIndex);
+                });
+            });
 
             let keyListener = function(e){
 
@@ -108,8 +133,6 @@
                 rendition.themes.fontSize(fontPercent + "%");
                 e.preventDefault();
             }, false);
-
-
 
             document.addEventListener("keyup", keyListener, false);
         }
