@@ -14,16 +14,19 @@
 </head>
 <body>
     <div id="title"><input type="file" id="input"></div>
-    <select id="toc"></select>
-    <div id="viewer" class="spreads"></div>
+    <select id="toc">
+    </select>,
+    <div id="viewer" class="scrolled" style="border: 1px solid black"></div>
     <a id="prev" href="#prev" class="arrow">‹</a>
     <a id="next" href="#next" class="arrow">›</a>
-    <a id="g" href="#g" class="arrow">b</a>
-    <a id="k" href="#k" class="arrow">s</a>
-    <a id="paragraph" href="#paragraph" class="arrow">paragraph</a>
+    <a id="big" href="#big" class="arrow">A</a>
+    <a id="small" href="#small" class="arrow">a</a>
+    <a id="paragraph" href="#paragraph" class="arrow">P</a>
 
     <script>
-        let book = ePub();
+        let book;
+        let globalToc;
+        let currentChapter = 0;
         let rendition;
         let fontPercent = 100;
 
@@ -38,27 +41,42 @@
             }
         });
 
-        function openBook(e){
+
+
+        async function openBook(e){
+            if(book) book.destroy();
+            /*let options = {
+                requestMethod: "xy",
+                encoding: "xyz"
+            };
+            let options2 = {};
+            options2.requestMethod = "xy";
+            options2.encoding = "xyz";*/
+            // new Book(url, {requestMethod: "xy", encoding: "xyz"});
+            // new Book(url, options);
+            // new Book(url, options2);
+            book = ePub();
+            console.log(book.opened, book.pagelist)
             let bookData = e.target.result;
             let title = document.getElementById("title");
             let next = document.getElementById("next");
             let prev = document.getElementById("prev");
-            let g = document.getElementById("g");
-            let k = document.getElementById("k");
+            let big = document.getElementById("big");
+            let small = document.getElementById("small");
 
-            book.open(bookData, "binary");
-
-            rendition = book.renderTo("viewer", {
-                flow: "scrolled-doc"
+            await book.open(bookData, "binary");
+            //let promise = book.open(bookData, "binary");
+            /*promise.then(function() {
+                console.log("Buch fertig geladen");
             });
+            await promise;
+            console.log("book.open vorbei... Buch wird geladen...");*/
 
-            rendition.display(20);
-
-            book.loaded.navigation.then(function(toc) {
+            book.loaded.navigation.then(function(toc){
                 let select = document.getElementById("toc"),
                     docfrag = document.createDocumentFragment();
-
-                toc.forEach(function (chapter) {
+                globalToc = toc.toc;
+                toc.forEach(function(chapter) {
                     let option = document.createElement("option");
                     option.textContent = chapter.label;
                     option.ref = chapter.href;
@@ -68,29 +86,49 @@
 
                 select.appendChild(docfrag);
 
-                select.onchange = function () {
+                select.onchange = function(){
                     let index = select.selectedIndex,
                         url = select.options[index].ref;
-                    display(url);
+                    console.log(index, url)
+                    rendition.display(url);
                     return false;
                 };
-
-                book.opened.then(function () {
-                    display(currentSectionIndex);
-                });
             });
 
+            rendition = book.renderTo("viewer", {
+                width: 700,
+                height: 100,
+                allowScriptedContent: true
+            });
+
+            rendition.display(20);
+
             let keyListener = function(e){
+                console.log(e)
+                // Left Key
+                if (!e.ctrlKey && (e.keyCode || e.which) == 37) {
+                    rendition.prev();
+                }
 
                 // Left Key
-                if ((e.keyCode || e.which) == 37) {
-                    rendition.prev();
-
+                if (e.ctrlKey && (e.keyCode || e.which) == 37) {
+                    if(currentChapter > 0) {
+                        currentChapter--;
+                    }
+                    rendition.display(globalToc[currentChapter].href);
                 }
 
                 // Right Key
-                if ((e.keyCode || e.which) == 39) {
+                if (!e.ctrlKey && (e.keyCode || e.which) == 39) {
                     rendition.next();
+                }
+
+                // Right Key
+                if (e.ctrlKey && (e.keyCode || e.which) == 39) {
+                    if(currentChapter < globalToc.length - 1) {
+                        currentChapter++;
+                    }
+                    rendition.display(globalToc[currentChapter].href);
                 }
 
                 // UP Key
@@ -104,35 +142,34 @@
                     fontPercent = fontPercent - 10;
                     rendition.themes.fontSize(fontPercent + "%");
                 }
-
             };
 
-            //rendition.on("keyup", keyListener);
-            rendition.on("relocated", function(location){
-                console.log(location);
-            });
+                //rendition.on("keyup", keyListener);
+                rendition.on("relocated", function(location){
+                    console.log(location);
+                });
 
-            next.addEventListener("click", function(e){
-                rendition.next();
-                e.preventDefault();
-            }, false);
+                next.addEventListener("click", function(e){
+                    rendition.next();
+                    e.preventDefault();
+                }, false);
 
-            prev.addEventListener("click", function(e){
-                rendition.prev();
-                e.preventDefault();
-            }, false);
+                prev.addEventListener("click", function(e){
+                    rendition.prev();
+                    e.preventDefault();
+                }, false);
 
-            g.addEventListener("click", function(e){
-                fontPercent = fontPercent + 10;
-                rendition.themes.fontSize(fontPercent + "%");
-                e.preventDefault();
-            }, false);
+                big.addEventListener("click", function(e){
+                    fontPercent = fontPercent + 10;
+                    rendition.themes.fontSize(fontPercent + "%");
+                    e.preventDefault();
+                }, false);
 
-            k.addEventListener("click", function(e){
-                fontPercent = fontPercent - 10;
-                rendition.themes.fontSize(fontPercent + "%");
-                e.preventDefault();
-            }, false);
+                small.addEventListener("click", function(e){
+                    fontPercent = fontPercent - 10;
+                    rendition.themes.fontSize(fontPercent + "%");
+                    e.preventDefault();
+                }, false);
 
             document.addEventListener("keyup", keyListener, false);
         }

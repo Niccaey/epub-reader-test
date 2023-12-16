@@ -11,9 +11,9 @@
 
             document.addEventListener('keydown', function(event) {
                 // Überprüfen, ob die gedrückte Taste die Taste "p" ist
-                if (event.key === 'p') {
+                if (event.keyCode === 80) {
                     // Alle <p>-Elemente ausblenden
-                    let allParagraphs = document.querySelectorAll('p');
+                    let allParagraphs =     document.querySelectorAll('p');
                     allParagraphs.forEach(function(paragraph) {
                         paragraph.style.display = 'none';
                     });
@@ -21,7 +21,7 @@
                     //Das nächste <p>-Element anzeigen
                     currentIndex = (currentIndex + 1) % allParagraphs.length;
                     let selectedParagraph = allParagraphs[currentIndex];
-                    selectedParagraph.style.display = 'block';a
+                    selectedParagraph.style.display = 'block';
                 }
             });
         });
