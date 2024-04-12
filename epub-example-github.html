@@ -41,8 +41,6 @@
             }
         });
 
-
-
         async function openBook(e){
             if(book) book.destroy();
             /*let options = {
@@ -57,14 +55,21 @@
             // new Book(url, options2);
             book = ePub();
             console.log(book.opened, book.pagelist)
-            let bookData = e.target.result;
+
             let title = document.getElementById("title");
             let next = document.getElementById("next");
             let prev = document.getElementById("prev");
             let big = document.getElementById("big");
             let small = document.getElementById("small");
 
-            await book.open(bookData, "binary");
+            let bookUrl = e;
+            let bookData = e && e.target ? e.target.result :null;
+            if(bookData) {
+                await book.open(bookData, "binary");
+            } else {
+                await book.open(bookUrl);
+            }
+
             //let promise = book.open(bookData, "binary");
             /*promise.then(function() {
                 console.log("Buch fertig geladen");
@@ -173,6 +178,7 @@
 
             document.addEventListener("keyup", keyListener, false);
         }
+        openBook("https://s3.amazonaws.com/moby-dick/");
     </script>
 </body>
 </html>
